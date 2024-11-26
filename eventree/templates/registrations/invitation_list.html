@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}My Invitations{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-4">My Invitations</h1>
+
+  <div class="row">
+    {% for invitation in invitations %}
+      <div class="col-md-6 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ invitation.registration.event.name }}</h5>
+            <p class="card-text">
+              <strong>Date:</strong> {{ invitation.registration.event.date|date:"F j, Y" }}<br>
+              <strong>Time:</strong> {{ invitation.registration.event.date|date:"g:i A" }}<br>
+              <strong>Location:</strong> {{ invitation.registration.event.location }}<br>
+              <strong>Invited By:</strong> {{ invitation.registration.user.get_full_name }}
+            </p>
+
+            <div class="mb-3">
+              <span class="badge {% if invitation.is_accepted %}bg-success{% elif invitation.is_declined %}bg-danger{% else %}bg-warning{% endif %}">
+                {% if invitation.status == 'ACCEPTED' %}Accepted
+                {% elif invitation.status == 'DECLINED' %}Declined
+                {% else %}Pending Response
+                {% endif %}
+              </span>
+            </div>
+
+            {% if invitation.is_accepted %}
+              {% if invitation.meal_selections.exists %}
+                <div class="mb-3">
+                  <h6>Your Meal Selections:</h6>
+                  <ul class="list-unstyled">
+                    {% for selection in invitation.meal_selections.all %}
+                      <li>
+                        {{ selection.meal.name }} ({{ selection.quantity }}x)
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% else %}
+                <div class="alert alert-info mb-3">
+                  <small>Don't forget to select your meals!</small>
+                </div>
+              {% endif %}
+            {% endif %}
+          </div>
+
+          <div class="card-footer bg-transparent">
+            {% if not invitation.is_accepted and not invitation.is_declined %}
+              <div class="d-grid gap-2">
+                <a href="{% url 'events:registrations:invitation_accept' invitation.token %}" 
+                   class="btn btn-success">Accept</a>
+                <a href="{% url 'events:registrations:invitation_decline' invitation.token %}" 
+                   class="btn btn-outline-danger">Decline</a>
+              </div>
+            {% elif invitation.is_accepted and not invitation.meal_selections.exists %}
+              <div class="d-grid">
+                <a href="{% url 'events:meals:meal_selection' invitation.registration.pk %}" 
+                   class="btn btn-primary">Select Meals</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info">
+          You don't have any invitations at this time.
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

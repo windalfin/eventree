@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Select Meals - {{ registration.event.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'events:event_list' %}">Events</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'events:event_detail' registration.event.pk %}">{{ registration.event.title }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Select Meals</li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="card">
+        <div class="card-body">
+          <h1 class="card-title h3 mb-4">Select Your Meals</h1>
+          
+          <form method="post">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+              {% for error in form.non_field_errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="mb-3">
+              <label for="{{ form.meal.id_for_label }}" class="form-label">Meal Option</label>
+              {{ form.meal }}
+              {% if form.meal.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.meal.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+            
+            <div class="mb-3">
+              <label for="{{ form.quantity.id_for_label }}" class="form-label">Quantity</label>
+              {{ form.quantity }}
+              {% if form.quantity.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.quantity.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="form-text">Maximum 10 meals per selection</div>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">Submit Meal Selection</button>
+              <a href="{% url 'events:event_detail' registration.event.pk %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

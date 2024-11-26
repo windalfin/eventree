@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}My Registrations{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-4">My Registrations</h1>
+
+  <div class="row">
+    {% for registration in registrations %}
+      <div class="col-md-6 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ registration.event.title }}</h5>
+            <p class="card-text">
+              <strong>Date:</strong> {{ registration.event.date|date:"F j, Y" }}<br>
+              <strong>Status:</strong> 
+              <span class="badge {% if registration.is_verified %}bg-success{% else %}bg-warning{% endif %}">
+                {% if registration.is_verified %}Verified{% else %}Pending Verification{% endif %}
+              </span>
+            </p>
+            
+            {% if registration.meal_selections.exists %}
+              <div class="mb-3">
+                <h6>Meal Selections:</h6>
+                <ul class="list-unstyled">
+                  {% for selection in registration.meal_selections.all %}
+                    <li>
+                      {{ selection.meal.name }} ({{ selection.quantity }}x)
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+
+            {% if registration.invitations.exists %}
+              <div class="mb-3">
+                <h6>Guest Invitations:</h6>
+                <ul class="list-unstyled">
+                  {% for invitation in registration.invitations.all %}
+                    <li>
+                      {{ invitation.guest_email }}
+                      <span class="badge {% if invitation.is_accepted %}bg-success{% elif invitation.is_declined %}bg-danger{% else %}bg-warning{% endif %}">
+                        {% if invitation.is_accepted %}Accepted
+                        {% elif invitation.is_declined %}Declined
+                        {% else %}Pending
+                        {% endif %}
+                      </span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          </div>
+          
+          <div class="card-footer bg-transparent">
+            <div class="d-grid gap-2">
+              <a href="{% url 'events:registrations:registration_detail' registration.pk %}" 
+                 class="btn btn-outline-primary">View Details</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info">
+          You haven't registered for any events yet. 
+          <a href="{% url 'events:event_list' %}" class="alert-link">Browse available events</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

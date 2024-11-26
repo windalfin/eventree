@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Registration - {{ registration.event.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'events:event_list' %}">Events</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'events:registrations:registration_list' %}">My Registrations</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ registration.event.title }}</li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="card-title">{{ registration.event.title }}</h2>
+          <div class="mb-4">
+            <span class="badge {% if registration.is_verified %}bg-success{% else %}bg-warning{% endif %} me-2">
+              {% if registration.is_verified %}Verified{% else %}Pending Verification{% endif %}
+            </span>
+            <span class="badge bg-primary">{{ registration.event.get_event_type_display }}</span>
+          </div>
+
+          <h5>Event Details</h5>
+          <p class="mb-4">{{ registration.event.description }}</p>
+          
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <p><strong>Date:</strong> {{ registration.event.get_event_date_string }}</p>
+              <p><strong>Time:</strong> {{ registration.event.get_event_time_string }}</p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Location:</strong> {{ registration.event.location }}</p>
+              <p><strong>Registration Date:</strong> {{ registration.created_at|date:"F j, Y" }}</p>
+            </div>
+          </div>
+
+          {% if not registration.is_verified %}
+            <div class="alert alert-warning">
+              <h5 class="alert-heading">Verification Required</h5>
+              <p>Please check your email for the verification link to complete your registration.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if registration.meal_selections.exists %}
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Meal Selections</h5>
+            <div class="list-group list-group-flush">
+              {% for selection in registration.meal_selections.all %}
+                <div class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="mb-1">{{ selection.meal.name }}</h6>
+                      <p class="mb-1 text-muted">{{ selection.meal.description }}</p>
+                      <small class="text-muted">Quantity: {{ selection.quantity }}</small>
+                    </div>
+                    <a href="{% url 'events:meals:meal_selection_update' selection.pk %}" 
+                       class="btn btn-sm btn-outline-primary">
+                      Edit
+                    </a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title">Guest Invitations</h5>
+          {% if registration.sent_invitations.exists %}
+            <div class="list-group list-group-flush mb-3">
+              {% for invitation in registration.sent_invitations.all %}
+                <div class="list-group-item">
+                  <h6 class="mb-1">{{ invitation.email }}</h6>
+                  <p class="mb-1">
+                    <span class="badge {% if invitation.status == 'ACCEPTED' %}bg-success{% elif invitation.status == 'DECLINED' %}bg-danger{% else %}bg-warning{% endif %}">
+                      {% if invitation.status == 'ACCEPTED' %}Accepted
+                      {% elif invitation.status == 'DECLINED' %}Declined
+                      {% else %}Pending Response
+                      {% endif %}
+                    </span>
+                  </p>
+                  <small class="text-muted">Sent: {{ invitation.created_at|date:"F j, Y" }}</small>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted mb-3">No guests invited yet.</p>
+          {% endif %}
+
+          <div class="d-grid">
+            <a href="{% url 'events:registrations:invite_guest' registration.pk %}" 
+               class="btn btn-primary">
+              Invite Guest
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {% if not registration.meal_selections.exists %}
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Meal Selection</h5>
+            <p class="text-muted mb-3">You haven't selected any meals yet.</p>
+            <div class="d-grid">
+              <a href="{% url 'events:meals:meal_selection' registration.pk %}" 
+                 class="btn btn-primary">
+                Select Meals
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Invite Guest - {{ registration.event.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'events:event_list' %}">Events</a></li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'events:registrations:registration_detail' registration.pk %}">
+          {{ registration.event.title }}
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Invite Guest</li>
+    </ol>
+  </nav>
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Invite Guest</h2>
+          
+          <div class="alert alert-info mb-4">
+            <h5 class="alert-heading">Event Information</h5>
+            <p class="mb-1"><strong>Event:</strong> {{ registration.event.title }}</p>
+            <p class="mb-1"><strong>Date:</strong> {{ registration.event.get_event_date_string }}</p>
+            <p class="mb-1"><strong>Time:</strong> {{ registration.event.get_event_time_string }}</p>
+            <p class="mb-0"><strong>Location:</strong> {{ registration.event.location }}</p>
+          </div>
+
+          {% if registration.invitations.count >= registration.event.max_guests_per_registration %}
+            <div class="alert alert-warning mb-4">
+              <h5 class="alert-heading">Maximum Guests Reached</h5>
+              <p class="mb-0">
+                You have reached the maximum number of guests allowed for this event 
+                ({{ registration.event.max_guests_per_registration }} guests per registration).
+              </p>
+            </div>
+          {% else %}
+            <form method="post">
+              {% csrf_token %}
+              {{ form|crispy }}
+              
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">
+                  Send Invitation
+                </button>
+                <a href="{% url 'events:registrations:registration_detail' registration.pk %}" 
+                   class="btn btn-outline-secondary">
+                  Cancel
+                </a>
+              </div>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

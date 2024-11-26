@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Select Meals - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="mb-0">Select Meals</h3>
+        </div>
+        <div class="card-body">
+          <div class="mb-4">
+            <h5>Event Details</h5>
+            <p><strong>Event:</strong> {{ event.title }}</p>
+            <p><strong>Date:</strong> {{ event.start_date|date:"F j, Y" }}</p>
+            <p><strong>Location:</strong> {{ event.location }}</p>
+          </div>
+
+          <form method="post" class="meal-selection-form">
+            {% csrf_token %}
+            
+            {% if registration.invited_registrations.exists %}
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle"></i> You can select meals for yourself and your invited guests.
+            </div>
+            {% endif %}
+            
+            {% regroup meals by get_meal_type_display as meal_list %}
+            
+            {% for meal_type in meal_list %}
+            <div class="card mb-4">
+              <div class="card-header">
+                <h4 class="mb-0">{{ meal_type.grouper }}</h4>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  {% for meal in meal_type.list %}
+                  <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <h5 class="card-title">{{ meal.name }}</h5>
+                        <p class="card-text">{{ meal.description }}</p>
+                        <div class="text-muted mb-3">
+                          <small>
+                            <i class="fas fa-utensils"></i> {{ meal.get_dietary_restriction_display }}
+                            {% if meal.is_available %}
+                            <span class="badge bg-success ms-2">{{ meal.remaining_quantity }} available</span>
+                            {% else %}
+                            <span class="badge bg-danger ms-2">Not Available</span>
+                            {% endif %}
+                          </small>
+                        </div>
+                        
+                        {% if meal.is_available %}
+                        <div class="form-group">
+                          <label for="meal_{{ meal.id }}">Quantity:</label>
+                          <select name="meal_{{ meal.id }}" id="meal_{{ meal.id }}" class="form-select">
+                            <option value="0">None</option>
+                            {% for i in meal.remaining_quantity|get_range %}
+                            <option value="{{ i }}" {% if meal_selections|get_selected:meal.id == i %}selected{% endif %}>
+                              {{ i }}
+                            </option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            
+            {% if registration.invited_registrations.exists %}
+            <div class="card mb-4">
+              <div class="card-header">
+                <h4 class="mb-0">Guest Selections</h4>
+              </div>
+              <div class="card-body">
+                {% for guest_registration in registration.invited_registrations.all %}
+                <div class="mb-4">
+                  <h5>{{ guest_registration.user.get_full_name }}</h5>
+                  {% include "events/includes/meal_selection_form.html" with registration=guest_registration %}
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+            
+            <div class="mt-4">
+              <button type="submit" class="btn btn-primary">Save Meal Selections</button>
+              <a href="{% url 'events:registration_detail' registration.id %}" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.meal-selection-form');
+    
+    form.addEventListener('change', function(e) {
+        if (e.target.tagName === 'SELECT') {
+            validateTotalQuantities();
+        }
+    });
+    
+    function validateTotalQuantities() {
+        const selections = {};
+        const selects = form.querySelectorAll('select');
+        
+        selects.forEach(select => {
+            const mealId = select.id.split('_')[1];
+            if (!selections[mealId]) {
+                selections[mealId] = 0;
+            }
+            selections[mealId] += parseInt(select.value);
+        });
+        
+        for (const [mealId, quantity] of Object.entries(selections)) {
+            const maxQuantity = parseInt(document.querySelector(`#meal_${mealId}`).dataset.maxQuantity);
+            if (quantity > maxQuantity) {
+                alert(`You've selected too many portions for this meal. Maximum available: ${maxQuantity}`);
+                return false;
+            }
+        }
+        
+        return true;
+    }
+});
+</script>
+{% endblock %}

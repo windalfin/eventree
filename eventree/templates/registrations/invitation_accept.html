@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Accept Invitation - {{ invitation.registration.event.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body text-center">
+          <div class="mb-4">
+            <i class="fas fa-check-circle text-success fa-4x"></i>
+          </div>
+          <h2 class="card-title mb-4">Invitation Accepted!</h2>
+          <p class="lead text-success mb-4">
+            You have successfully accepted the invitation to {{ invitation.registration.event.title }}.
+          </p>
+
+          <div class="alert alert-info mb-4">
+            <h5 class="alert-heading">Event Details</h5>
+            <p class="mb-1"><strong>Date:</strong> {{ invitation.registration.event.date|date:"F j, Y" }}</p>
+            <p class="mb-1"><strong>Time:</strong> {{ invitation.registration.event.date|date:"g:i A" }}</p>
+            <p class="mb-0"><strong>Location:</strong> {{ invitation.registration.event.location }}</p>
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">
+                Continue to Meal Selection
+              </button>
+              <a href="{% url 'events:registrations:invitation_list' %}" 
+                 class="btn btn-outline-secondary">
+                View All Invitations
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Available Meals{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'events:event_list' %}">Events</a></li>
+      {% if event %}
+        <li class="breadcrumb-item">
+          <a href="{% url 'events:event_detail' event.pk %}">{{ event.title }}</a>
+        </li>
+      {% endif %}
+      <li class="breadcrumb-item active" aria-current="page">Meals</li>
+    </ol>
+  </nav>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Available Meals</h1>
+    {% if user.is_staff %}
+      <a href="#" class="btn btn-primary">Add New Meal</a>
+    {% endif %}
+  </div>
+
+  {% if event %}
+    <div class="alert alert-info mb-4">
+      <h5 class="alert-heading">Event Information</h5>
+      <p class="mb-1"><strong>Event:</strong> {{ event.title }}</p>
+      <p class="mb-1"><strong>Date:</strong> {{ event.date|date:"F j, Y" }}</p>
+      <p class="mb-0"><strong>Location:</strong> {{ event.location }}</p>
+    </div>
+  {% endif %}
+
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for meal in meals %}
+      <div class="col">
+        <div class="card h-100">
+          {% if meal.image %}
+            <img src="{{ meal.image.url }}" class="card-img-top" alt="{{ meal.name }}">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title">{{ meal.name }}</h5>
+            <p class="card-text">{{ meal.description }}</p>
+            
+            <div class="mb-3">
+              <span class="badge bg-primary me-2">{{ meal.get_meal_type_display }}</span>
+              {% for restriction in meal.dietary_restrictions.all %}
+                <span class="badge bg-info me-1">{{ restriction.name }}</span>
+              {% endfor %}
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted">
+                Available: {{ meal.remaining_quantity }} / {{ meal.quantity }}
+              </small>
+              <span class="badge {% if meal.is_available %}bg-success{% else %}bg-danger{% endif %}">
+                {% if meal.is_available %}Available{% else %}Sold Out{% endif %}
+              </span>
+            </div>
+          </div>
+          
+          <div class="card-footer bg-transparent">
+            <div class="d-grid">
+              <a href="{% url 'events:meals:meal_detail' meal.pk %}" 
+                 class="btn btn-outline-primary">View Details</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info">
+          No meals available at this time.
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

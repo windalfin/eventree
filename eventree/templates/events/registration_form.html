@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register for {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'events:event_list' %}">Events</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'events:event_detail' event.pk %}">{{ event.title }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Register</li>
+    </ol>
+  </nav>
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Register for {{ event.title }}</h2>
+          
+          <div class="alert alert-info mb-4">
+            <h5 class="alert-heading">Event Details</h5>
+            <p class="mb-1"><strong>Date:</strong> {{ event.date|date:"F j, Y" }}</p>
+            <p class="mb-1"><strong>Time:</strong> {{ event.date|date:"g:i A" }}</p>
+            <p class="mb-1"><strong>Location:</strong> {{ event.location }}</p>
+            <p class="mb-0"><strong>Available Spots:</strong> {{ event.remaining_capacity }}</p>
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">
+                Complete Registration
+              </button>
+              <a href="{% url 'events:event_detail' event.pk %}" class="btn btn-outline-secondary">
+                Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Select Your Meal - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'events:event_list' %}">Events</a></li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'events:event_detail' event.pk %}">{{ event.title }}</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Meal Selection</li>
+    </ol>
+  </nav>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h2 class="card-title">Select Your Meal</h2>
+      <p class="lead">Please choose your meal preference for {{ event.title }}</p>
+
+      <div class="alert alert-info">
+        <h5 class="alert-heading">Event Information</h5>
+        <p class="mb-1"><strong>Date:</strong> {{ event.date|date:"F j, Y" }}</p>
+        <p class="mb-1"><strong>Time:</strong> {{ event.date|date:"g:i A" }}</p>
+        <p class="mb-0"><strong>Location:</strong> {{ event.location }}</p>
+      </div>
+
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+          {% for meal in available_meals %}
+            <div class="col">
+              <div class="card h-100">
+                {% if meal.image %}
+                  <img src="{{ meal.image.url }}" class="card-img-top" alt="{{ meal.name }}">
+                {% endif %}
+                <div class="card-body">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" 
+                           name="meal_choice" id="meal_{{ meal.pk }}" 
+                           value="{{ meal.pk }}"
+                           {% if selected_meal == meal %}checked{% endif %}>
+                    <label class="form-check-label" for="meal_{{ meal.pk }}">
+                      <h5 class="card-title mb-3">{{ meal.name }}</h5>
+                    </label>
+                  </div>
+
+                  <p class="card-text">{{ meal.description }}</p>
+                  
+                  <div class="mb-3">
+                    <span class="badge bg-primary me-2">{{ meal.get_meal_type_display }}</span>
+                    {% for restriction in meal.dietary_restrictions.all %}
+                      <span class="badge bg-info me-1">{{ restriction.name }}</span>
+                    {% endfor %}
+                  </div>
+
+                  {% if meal.allergens.exists %}
+                    <div class="alert alert-warning">
+                      <small>
+                        <strong>Allergens:</strong>
+                        {% for allergen in meal.allergens.all %}
+                          {{ allergen.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                      </small>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <div class="col-12">
+              <div class="alert alert-warning">
+                No meals are currently available for selection.
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        {% if available_meals %}
+          <div class="mt-4">
+            <div class="form-group mb-3">
+              <label for="dietary_notes">Dietary Notes or Special Requests:</label>
+              <textarea class="form-control" id="dietary_notes" 
+                        name="dietary_notes" rows="3"
+                        placeholder="Please note any allergies or special dietary requirements...">{{ dietary_notes }}</textarea>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="submit" class="btn btn-primary">
+                Confirm Meal Selection
+              </button>
+              <a href="{% url 'events:event_detail' event.pk %}" 
+                 class="btn btn-outline-secondary">
+                Cancel
+              </a>
+            </div>
+          </div>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

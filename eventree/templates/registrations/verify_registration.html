@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Registration{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body text-center">
+          {% if error %}
+            <div class="mb-4">
+              <i class="fas fa-times-circle text-danger fa-4x"></i>
+            </div>
+            <h2 class="card-title mb-4">Verification Failed</h2>
+            <p class="lead text-danger mb-4">{{ error }}</p>
+            <div class="d-grid">
+              <a href="{% url 'events:event_list' %}" class="btn btn-primary">
+                Browse Events
+              </a>
+            </div>
+          {% else %}
+            <div class="mb-4">
+              <i class="fas fa-check-circle text-success fa-4x"></i>
+            </div>
+            <h2 class="card-title mb-4">Registration Verified!</h2>
+            <p class="lead text-success mb-4">
+              Your registration for {{ registration.event.title }} has been successfully verified.
+            </p>
+            <div class="d-grid gap-2">
+              <a href="{% url 'events:registrations:registration_detail' registration.pk %}" 
+                 class="btn btn-primary">
+                View Registration
+              </a>
+              <a href="{% url 'events:event_list' %}" class="btn btn-outline-secondary">
+                Browse More Events
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

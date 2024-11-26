@@ -1,0 +1,50 @@
+{% for meal_type in meal_list %}
+<div class="card mb-3">
+  <div class="card-header">
+    <h5 class="mb-0">{{ meal_type.grouper }}</h5>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      {% for meal in meal_type.list %}
+      <div class="col-md-6 mb-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <h6 class="card-title">{{ meal.name }}</h6>
+            <p class="card-text small">{{ meal.description }}</p>
+            <div class="text-muted mb-2">
+              <small>
+                <i class="fas fa-utensils"></i> {{ meal.get_dietary_restriction_display }}
+                {% if meal.is_available %}
+                <span class="badge bg-success ms-2">{{ meal.remaining_quantity }} available</span>
+                {% else %}
+                <span class="badge bg-danger ms-2">Not Available</span>
+                {% endif %}
+              </small>
+            </div>
+            
+            {% if meal.is_available %}
+            <div class="form-group">
+              <label for="guest_meal_{{ registration.id }}_{{ meal.id }}">Quantity:</label>
+              <select 
+                name="guest_meal_{{ registration.id }}_{{ meal.id }}" 
+                id="guest_meal_{{ registration.id }}_{{ meal.id }}" 
+                class="form-select form-select-sm"
+                data-max-quantity="{{ meal.remaining_quantity }}"
+              >
+                <option value="0">None</option>
+                {% for i in meal.remaining_quantity|get_range %}
+                <option value="{{ i }}" {% if guest_meal_selections|get_selected:meal.id == i %}selected{% endif %}>
+                  {{ i }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endfor %}

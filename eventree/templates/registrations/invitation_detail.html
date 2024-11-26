@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Invitation - {{ invitation.registration.event.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title mb-4">{{ invitation.registration.event.title }}</h2>
+          
+          <div class="alert alert-info mb-4">
+            <h5 class="alert-heading">Event Details</h5>
+            <p class="mb-1"><strong>Date:</strong> {{ invitation.registration.event.date|date:"F j, Y" }}</p>
+            <p class="mb-1"><strong>Time:</strong> {{ invitation.registration.event.date|date:"g:i A" }}</p>
+            <p class="mb-1"><strong>Location:</strong> {{ invitation.registration.event.location }}</p>
+            <p class="mb-0"><strong>Invited By:</strong> {{ invitation.registration.user.get_full_name }}</p>
+          </div>
+
+          {% if invitation.is_accepted %}
+            <div class="alert alert-success mb-4">
+              <h5 class="alert-heading">Invitation Accepted</h5>
+              <p class="mb-0">You have accepted this invitation. We look forward to seeing you at the event!</p>
+            </div>
+
+            {% if not invitation.meal_selections.exists %}
+              <div class="alert alert-warning mb-4">
+                <h5 class="alert-heading">Meal Selection Required</h5>
+                <p class="mb-0">Please select your meals for the event.</p>
+              </div>
+              
+              <div class="d-grid">
+                <a href="{% url 'events:meals:meal_selection' invitation.registration.pk %}" 
+                   class="btn btn-primary">Select Meals</a>
+              </div>
+            {% else %}
+              <h5 class="mb-3">Your Meal Selections</h5>
+              <div class="list-group mb-4">
+                {% for selection in invitation.meal_selections.all %}
+                  <div class="list-group-item">
+                    <h6 class="mb-1">{{ selection.meal.name }}</h6>
+                    <p class="mb-1 text-muted">{{ selection.meal.description }}</p>
+                    <small class="text-muted">Quantity: {{ selection.quantity }}</small>
+                  </div>
+                {% endfor %}
+              </div>
+
+              <div class="d-grid">
+                <a href="{% url 'events:meals:meal_selection_update' invitation.meal_selections.first.pk %}" 
+                   class="btn btn-outline-primary">
+                  Update Meal Selections
+                </a>
+              </div>
+            {% endif %}
+
+          {% elif invitation.is_declined %}
+            <div class="alert alert-danger mb-4">
+              <h5 class="alert-heading">Invitation Declined</h5>
+              <p class="mb-0">You have declined this invitation.</p>
+            </div>
+
+            <div class="d-grid">
+              <a href="{% url 'events:registrations:invitation_accept' invitation.token %}" 
+                 class="btn btn-success">
+                Change Response to Accept
+              </a>
+            </div>
+
+          {% else %}
+            <p class="mb-4">You have been invited to attend this event. Please respond to the invitation:</p>
+            
+            <div class="d-grid gap-2">
+              <a href="{% url 'events:registrations:invitation_accept' invitation.token %}" 
+                 class="btn btn-success">
+                Accept Invitation
+              </a>
+              <a href="{% url 'events:registrations:invitation_decline' invitation.token %}" 
+                 class="btn btn-outline-danger">
+                Decline Invitation
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
