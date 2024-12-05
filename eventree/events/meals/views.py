@@ -108,6 +108,11 @@ class MealSelectionUpdateView(LoginRequiredMixin, UpdateView):
         kwargs['registration'] = registration
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['registration'] = self.object.registration
+        return context
+
     def form_valid(self, form):
         try:
             response = super().form_valid(form)
@@ -172,8 +177,8 @@ class MealAvailabilityView(View):
         return JsonResponse({
             'is_available': meal.is_available(),
             'remaining_quantity': meal.remaining_quantity(),
-            'total_capacity': meal.quantity,
+            'total_capacity': meal.available_quantity,
             'meal_name': meal.name,
             'meal_type': meal.meal_type,
-            'dietary_info': meal.dietary_info
+            'dietary_info': meal.dietary_restriction
         })

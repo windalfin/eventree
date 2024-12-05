@@ -1,17 +1,22 @@
 from django import forms
+from django.core.validators import MinValueValidator
 from .models import MealSelection, Meal
 
 class MealSelectionForm(forms.ModelForm):
+    quantity = forms.IntegerField(
+        validators=[MinValueValidator(1, message="Quantity must be at least 1")],
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '1',
+            'max': '10'
+        })
+    )
+
     class Meta:
         model = MealSelection
         fields = ['meal', 'quantity']
         widgets = {
             'meal': forms.Select(attrs={'class': 'form-control'}),
-            'quantity': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '1',
-                'max': '10'
-            })
         }
 
     def __init__(self, *args, **kwargs):

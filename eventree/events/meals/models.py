@@ -44,11 +44,15 @@ class Meal(models.Model):
 
     def is_available(self):
         """Check if meal is still available"""
-        return self.is_active and self.available_quantity > self.meal_selections.count()
+        total_selected = self.meal_selections.aggregate(
+            total=models.Sum('quantity'))['total'] or 0
+        return self.is_active and self.available_quantity > total_selected
 
     def remaining_quantity(self):
         """Get remaining available quantity"""
-        return max(0, self.available_quantity - self.meal_selections.count())
+        total_selected = self.meal_selections.aggregate(
+            total=models.Sum('quantity'))['total'] or 0
+        return max(0, self.available_quantity - total_selected)
 
 
 class MealSelection(models.Model):
