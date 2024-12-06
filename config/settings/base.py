@@ -86,6 +86,7 @@ LOCAL_APPS = [
     "eventree.events",
     "eventree.events.meals",
     "eventree.events.registrations",
+    "eventree.accommodations",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
